@@ -1,0 +1,4 @@
+.chainlit/translations
+__pycache__
+.env
+.venv
