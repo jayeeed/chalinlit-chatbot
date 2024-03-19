@@ -1,15 +1,15 @@
 from operator import itemgetter
-
-from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.schema.output_parser import StrOutputParser
-from langchain.schema.runnable import Runnable, RunnablePassthrough, RunnableLambda
-from langchain.schema.runnable.config import RunnableConfig
-from langchain.memory import ConversationBufferMemory
-
 from chainlit.types import ThreadDict
 import chainlit as cl
 from typing import Dict, Optional
+
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.memory import ConversationBufferMemory
+
+from langchain.schema.output_parser import StrOutputParser
+from langchain.schema.runnable import RunnablePassthrough, RunnableLambda
+from langchain.schema.runnable.config import RunnableConfig
 
 
 def setup_runnable():
@@ -17,7 +17,7 @@ def setup_runnable():
     model = ChatOpenAI(streaming=True)
     prompt = ChatPromptTemplate.from_messages(
         [
-            ("system", "You are a helpful chatbot"),
+            ("system", "You are a helpful chatbot. Answer as concisely as possible. If you don't know the answer, say that you don't know. You should not make up an answer. Try to be as objective as possible."),
             MessagesPlaceholder(variable_name="history"),
             ("human", "{question}"),
         ]
