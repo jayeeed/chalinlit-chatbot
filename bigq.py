@@ -21,7 +21,7 @@ settings = {
 
 
 sql_query_prompt = """You have a BigQuery table named `orders` in the dataset `order`.
-The table contains information about orders, including `order_id`, `order_date`, `estimated_delivery_date`, `status`, `tracking_id`, `customer_id`, `supplier_id`, `customer_contact` and `supplier_contact`.
+The table contains information about order information, including following columns: `order_id`, `order_date`, `estimated_delivery_date`, `status`, `tracking_id`, `customer_id`, `supplier_id`, `customer_contact`, `supplier_contact`.
 
 Write a SQL query to retrieve the full order based on the given question:
 
@@ -39,7 +39,7 @@ Markdown Table:
 {table}
 ```
 
-Concise analysis in 3 short bullet points just highlighting the most important points:
+Concise analysis in 3 short bullet points just highlighting important points in markdown format:
 """
 
 
