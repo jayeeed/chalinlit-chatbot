@@ -5,10 +5,11 @@ from langchain_experimental.agents.agent_toolkits import create_csv_agent
 
 from typing import *
 import PlotlyTool
-
-
 import chainlit as cl
+import plotly.express as px
+import pandas as pd
 
+file = "orders.csv"
 
 def plotly_chart_creator() -> str:
     """Creates a plotly chart from a dataset
@@ -16,12 +17,7 @@ def plotly_chart_creator() -> str:
     Returns:
         str: the plotly chart
     """
-    import plotly.express as px
-    import pandas as pd
-
-    df = pd.read_csv(
-        "https://raw.githubusercontent.com/plotly/datasets/master/2014_apple_stock.csv"
-    )
+    df = pd.read_csv(file)
     fig = px.line(df)
     cl.Message(
         content="chart",
@@ -32,17 +28,13 @@ def plotly_chart_creator() -> str:
 
 @cl.on_chat_start
 async def start():
-    import pandas as pd
-
-    df = pd.read_csv(
-        "https://raw.githubusercontent.com/plotly/datasets/master/2014_apple_stock.csv"
-    )
+    df = pd.read_csv(file)
     tools = [
         PlotlyTool.PlotlyPythonAstREPLTool(locals={"df": df}),
     ]
     agent = create_csv_agent(
         ChatOpenAI(temperature=0, model="gpt-3.5-turbo", streaming=True),
-        "https://raw.githubusercontent.com/plotly/datasets/master/2014_apple_stock.csv",
+        file,
         verbose=True,
         agent_type=AgentType.OPENAI_FUNCTIONS,
         extra_tools=tools,
