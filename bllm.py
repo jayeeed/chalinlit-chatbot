@@ -19,60 +19,43 @@ from langchain_community.chat_models import ChatOllama
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=500, separators=["\n\n", "\n", " ", ""])
 
-embeddings = OllamaEmbeddings(model="llama2:70b-chat")
+embeddings = OllamaEmbeddings(model="mxbai-embed-large:latest")
 
-welcome_message = """Welcome to the Chainlit PDF QA! To get started:
-1. Upload a PDF or text file
-2. Ask a question about the file
-"""
+# welcome_message = """Welcome to the Chainlit PDF QA! To get started:
+# 1. Upload a PDF or text file
+# 2. Ask a question about the file
+# """
 
-def process_file(file: AskFileResponse):
-    loader = UnstructuredFileLoader(file.path)
-    documents = loader.load()
-    docs = text_splitter.split_documents(documents)
-    for i, doc in enumerate(docs):
-        doc.metadata["source"] = f"source_{i}"
-    return docs
+# def process_file(file: AskFileResponse):
+#     loader = UnstructuredFileLoader(file.path)
+#     documents = loader.load()
+#     docs = text_splitter.split_documents(documents)
+#     for i, doc in enumerate(docs):
+#         doc.metadata["source"] = f"source_{i}"
+#     return docs
 
 
-def get_docsearch(file: AskFileResponse):
-    docs = process_file(file)
+# def get_docsearch(file: AskFileResponse):
+#     docs = process_file(file)
 
-    # Save data in the user session
-    cl.user_session.set("docs", docs)
+#     # Save data in the user session
+#     cl.user_session.set("docs", docs)
 
-    vectordb = Chroma.from_documents(
-        documents=docs,
-        embedding=embeddings,
-        persist_directory=f"./db",
-    )
+#     vectordb = Chroma.from_documents(
+#         documents=docs,
+#         embedding=embeddings,
+#         persist_directory=f"./bllm",
+#     )
 
-    return vectordb
+#     return vectordb
 
 
 @cl.on_chat_start
 async def start():
-    await cl.Avatar(
-        name="Chatbot",
-        url="https://avatars.githubusercontent.com/u/128686189?s=400&u=a1d1553023f8ea0921fba0debbe92a8c5f840dd9&v=4",
-    ).send()
-    files = None
-    while files is None:
-        files = await cl.AskFileMessage(
-            content=welcome_message,
-
-            accept=["text/plain", "text/csv", "text/html", "application/zip", "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",  "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel"],
-
-            max_size_mb=100,
-            timeout=1800,
-        ).send()
-
-    file = files[0]
-
-    msg = cl.Message(content=f"Processing `{file.name}`...", disable_feedback=True)
-    await msg.send()
-
-    vectordb = await cl.make_async(get_docsearch)(file)
+    vectordb = Chroma(
+        persist_directory="./bllm",
+        embedding_function=embeddings
+        )
 
     message_history = ChatMessageHistory()
 
@@ -83,8 +66,10 @@ async def start():
         return_messages=True,
     )
 
-    system_msg = """You are a chatbot. You'll receive a prompt that includes retrieved content from the vectorDB based on the user's question, and the source.
-    Your task is to respond to the user's new question using the information from the vectorDB without relying on your own knowledge.
+    system_msg = """
+    You are a helpful chatbot. Use vectorDB knowlegdebase only for understanding 'Bengali' grammar. 
+    Use your existing knowledgebase for answering questions. And translate your responses with the 'Bengali' 
+    grammartical knowledge from your database. I will can ask question in 'Bengali' or 'English' and you will response only in 'Bengali'.
     ----------------
     {summaries}"""
 
@@ -101,9 +86,9 @@ async def start():
     llm = ChatOllama(model="llama2:70b-chat", temperature=0)
 
     retriever = vectordb.as_retriever(
-    search_type="similarity",
-    search_kwargs={"k": 6},
-)
+        search_type="similarity",
+        search_kwargs={"k": 4},
+    )
 
     chain = RetrievalQAWithSourcesChain.from_chain_type(
         llm=llm,
@@ -115,10 +100,11 @@ async def start():
     )
 
     # Let the user know that the system is ready
-    msg.content = f"`{file.name}` processed. You can now ask questions!"
-    await msg.update()
+    msg = cl.Message(content="ChromaDB loaded. You can now ask questions!")
+    await msg.send()
 
     cl.user_session.set("chain", chain)
+
 
 
 @cl.on_message
