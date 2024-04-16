@@ -17,7 +17,7 @@ from langchain_community.chat_models import ChatOllama
 # from langchain import hub
 # prompt = hub.pull("rlm/rag-prompt")
 
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=500, separators=["\n\n", "\n", " ", ""])
+# text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=500, separators=["\n\n", "\n", " ", ""])
 
 embeddings = OllamaEmbeddings(model="mxbai-embed-large:latest")
 
@@ -87,7 +87,7 @@ async def start():
 
     retriever = vectordb.as_retriever(
         search_type="similarity",
-        search_kwargs={"k": 4},
+        search_kwargs={"k": 3},
     )
 
     chain = RetrievalQAWithSourcesChain.from_chain_type(

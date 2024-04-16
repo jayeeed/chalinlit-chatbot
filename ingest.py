@@ -12,7 +12,7 @@ from langchain_community.vectorstores import Chroma
 warnings.simplefilter("ignore")
 
 ABS_PATH: str = os.path.dirname(os.path.abspath(__file__))
-DB_DIR: str = os.path.join(ABS_PATH, "bllm")
+DB_DIR: str = os.path.join(ABS_PATH, "pf3d")
 
 
 # Create vector database
@@ -26,7 +26,7 @@ def create_vector_database():
 
     """
     # Initialize loaders for different file types
-    pdf_loader = DirectoryLoader("data/", glob="**/*.pdf", loader_cls=PyPDFLoader)
+    pdf_loader = DirectoryLoader("pf3d/", glob="**/*.pdf", loader_cls=PyPDFLoader)
     loaded_documents = pdf_loader.load()
     #len(loaded_documents)
 
@@ -37,7 +37,7 @@ def create_vector_database():
     chunked_documents[0]
 
     # Initialize Ollama Embeddings
-    ollama_embeddings = OllamaEmbeddings(model="mxbai-embed-large:latest")
+    ollama_embeddings = OllamaEmbeddings(model="mistral:instruct")
 
     # Create and persist a Chroma vector database from the chunked documents
     vector_database = Chroma.from_documents(
